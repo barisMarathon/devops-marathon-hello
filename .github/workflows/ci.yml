@@ -59,6 +59,12 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      # Fail loudly instead of silently falling back to GITHUB_TOKEN (which can't write to the gitops repo)
+      - name: Require deploy key
+        env:
+          KEY: ${{ secrets.GITOPS_DEPLOY_KEY }}
+        run: test -n "$KEY" || { echo "::error::GITOPS_DEPLOY_KEY secret is missing"; exit 1; }
+
       - name: Check out the gitops repo
         uses: actions/checkout@v4
         with:
